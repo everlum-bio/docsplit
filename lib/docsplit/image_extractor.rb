@@ -34,7 +34,7 @@ module Docsplit
       # Construct the output path
       output_path = File.join(@output, "#{basename}.#{format}")
       # Use ImageMagick to create the image
-      `magick -density #{resolution} "#{page}" "#{output_path}"`
+      `convert -density #{resolution} "#{page}" "#{output_path}"`
       Rails.logger.info("Docsplit convert method - Finshed Succesfully!")
     end
 
