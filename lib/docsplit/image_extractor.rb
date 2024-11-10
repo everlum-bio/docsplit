@@ -27,28 +27,17 @@ module Docsplit
     # we simply downsample that image, instead of re-rendering the entire PDF.
     # Now we generate one page at a time, a counterintuitive opimization
     # suggested by the GraphicsMagick list, that seems to work quite well.
-    def convert(pdf, size, format, previous=nil)
-      tempdir   = Dir.mktmpdir
-      basename  = File.basename(pdf, File.extname(pdf))
-      directory = directory_for(size)
-      pages     = @pages || '1-' + Docsplit.extract_length(pdf).to_s
-      escaped_pdf = ESCAPE[pdf]
-      FileUtils.mkdir_p(directory) unless File.exist?(directory)
-      common    = "#{MEMORY_ARGS} -density #{@density} #{resize_arg(size)} #{quality_arg(format)}"
-      if previous
-        FileUtils.cp(Dir[directory_for(previous) + '/*'], directory)
-        result = `MAGICK_TMPDIR=#{tempdir} OMP_NUM_THREADS=2 gm mogrify #{common} -unsharp 0x0.5+0.75 \"#{directory}/*.#{format}\" 2>&1`.chomp
-        raise ExtractionFailed, result if $? != 0
-      else
-        page_list(pages).each do |page|
-          out_file  = ESCAPE[File.join(directory, "#{basename}_#{page}.#{format}")]
-          cmd = "MAGICK_TMPDIR=#{tempdir} OMP_NUM_THREADS=2 gm convert +adjoin -define pdf:use-cropbox=true #{common} #{escaped_pdf}[#{page - 1}] #{out_file} 2>&1".chomp
-          result = `#{cmd}`.chomp
-          raise ExtractionFailed, result if $? != 0
-        end
-      end
-    ensure
-      FileUtils.remove_entry_secure tempdir if File.exist?(tempdir)
+    def convert(page, resolution, format, previous=nil)
+      # Ensure `options` is a hash before trying to access keys
+      Rails.logger.info("Docsplit convert method - page: #{page}, options: #{options}")
+      basename = "image" # Default basename in case it's nil
+      # Construct the output path
+      output_path = File.join(@output, "#{basename}.#{format}")
+      # Debugging information to inspect each argument
+      Rails.logger.info("Docsplit convert method - page: #{page}, output: #{output}, options: #{options.inspect}, basename: #{basename}, output_path: #{output_path}")
+
+      # Use ImageMagick's `convert` command
+      `magick -density #{resolution} "#{page}" "#{output_path}"`
     end
 
 
