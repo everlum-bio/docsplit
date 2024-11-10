@@ -29,15 +29,13 @@ module Docsplit
     # suggested by the GraphicsMagick list, that seems to work quite well.
     def convert(page, resolution, format, previous=nil)
       # Ensure `options` is a hash before trying to access keys
-      Rails.logger.info("Docsplit convert method - page: #{page}, options: #{options}")
-      basename = "image" # Default basename in case it's nil
+      Rails.logger.info("Docsplit convert method - Start")
+      basename = "image" 
       # Construct the output path
       output_path = File.join(@output, "#{basename}.#{format}")
-      # Debugging information to inspect each argument
-      Rails.logger.info("Docsplit convert method - page: #{page}, output: #{output}, options: #{options.inspect}, basename: #{basename}, output_path: #{output_path}")
-
-      # Use ImageMagick's `convert` command
+      # Use ImageMagick to create the image
       `magick -density #{resolution} "#{page}" "#{output_path}"`
+      Rails.logger.info("Docsplit convert method - Finshed Succesfully!")
     end
 
 
